@@ -31,6 +31,8 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> implements GameAgent<G, A> 
   private double[] evaluationWeights;
   private int playerNumber;
   private int depth;
+  private NodeEvaluation alpha;
+  private NodeEvaluation beta;
 
   public AlphaBetaAgent() {
     stats = new int[64];
@@ -44,10 +46,8 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> implements GameAgent<G, A> 
     evaluationWeights[playerNumber] = 1;
     this.playerNumber = playerNumber;
     depth = 10;
-  }
-
-  @Override
-  public void tearDown() {
+    alpha = NodeEvaluation.NEGATIVE_INFINITY;
+    beta = NodeEvaluation.POSITIVE_INFINITY;
   }
 
   @Override
@@ -62,9 +62,6 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> implements GameAgent<G, A> 
 
     List<MutablePair<Game<A, ?>, NodeEvaluation>> childMap = new ArrayList<>(
         possibleActions.size());
-
-    NodeEvaluation alpha = NodeEvaluation.NEGATIVE_INFINITY;
-    NodeEvaluation beta = NodeEvaluation.POSITIVE_INFINITY;
 
     for (A possibleAction : possibleActions) {
       Game<A, ?> child = game.doAction(possibleAction);
