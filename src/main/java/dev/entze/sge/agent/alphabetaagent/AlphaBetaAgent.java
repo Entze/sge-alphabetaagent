@@ -54,22 +54,29 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     super.setUp(numberOfPlayers, playerNumber);
 
     abTree.clear();
-    abTree.setNode(new AbGameNode<>(minMaxWeights));
+    abTree.setNode(new AbGameNode<>());
 
   }
 
   @Override
   public A computeNextAction(G game, long computationTime, TimeUnit timeUnit) {
 
+    super.computeNextAction(game, computationTime, timeUnit);
+
     Util.findRoot(abTree, game);
 
     if (sortPromisingCandidates(abTree, gameAbNodeComparator.reversed())) {
-      return abTree.getNode().getGame().getPreviousAction();
+      return abTree.getChild(0).getNode().getGame().getPreviousAction();
     }
 
     //while (!shouldStopComputation()) {
     labelAlphaBetaTree(abTree, determineDepth());
     //}
+
+    if (abTree.isLeaf()) {
+      return Collections.max(game.getPossibleActions(),
+          (o1, o2) -> gameComparator.compare(game.doAction(o1), game.doAction(o2)));
+    }
 
     return Collections.max(abTree.getChildren(), gameAbTreeComparator).getNode().getGame()
         .getPreviousAction();
@@ -128,8 +135,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
       tree = stack.peek();
 
       if (!cutOff(tree)) {
-        if (tree.getNode().getAbsoluteDepth() >= depth || (tree.isLeaf() && !expandNode(tree))
-            || lastParent == tree) {
+        if (tree.getNode().getAbsoluteDepth() >= depth || !expandNode(tree) || lastParent == tree) {
           evaluateNode(tree);
           stack.pop();
           lastParent = tree.getParent();

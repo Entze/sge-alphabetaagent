@@ -15,8 +15,14 @@ public class AbGameNode<A> implements GameNode<A> {
   private double heuristicBeta;
   private int absoluteDepth;
 
-  public AbGameNode(double[] weights) {
-    this(null, weights, 0);
+  public AbGameNode() {
+    this(null,
+        Double.NEGATIVE_INFINITY,
+        Double.NEGATIVE_INFINITY,
+        Double.NEGATIVE_INFINITY,
+        Double.POSITIVE_INFINITY,
+        Double.NEGATIVE_INFINITY,
+        Double.POSITIVE_INFINITY, 0);
   }
 
 
