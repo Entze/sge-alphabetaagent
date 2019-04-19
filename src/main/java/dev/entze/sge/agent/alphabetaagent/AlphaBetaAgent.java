@@ -98,7 +98,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
             .format(".done with %d alpha cut-off%s, %d beta cut-off%s and %s left.",
                 alphaCutOffs, alphaCutOffs != 1 ? "s" : "",
                 betaCutOffs, betaCutOffs != 1 ? "s" : "",
-                Util.convertUnitToReadableString(System.nanoTime() - START_TIME,
+                Util.convertUnitToReadableString(TIMEOUT - (System.nanoTime() - START_TIME),
                     TimeUnit.NANOSECONDS, timeUnit)));
 
     if (abTree.isLeaf()) {
