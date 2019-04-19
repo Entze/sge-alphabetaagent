@@ -18,6 +18,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     GameAgent<G, A> {
 
   private final int maxDepth;
+  private int lastDepth;
   private int depth;
 
   private Comparator<AbGameNode<A>> gameAbNodeUtilityComparator;
@@ -31,15 +32,19 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
   private int alphaCutOffs;
   private int betaCutOffs;
 
+  private int excessTime;
+  private int averageBranchingCount;
+  private double averageBranching;
+
   public AlphaBetaAgent() {
-    this(64, 10, null);
+    this(64, null);
   }
 
   public AlphaBetaAgent(Logger log) {
-    this(64, 10, log);
+    this(64, log);
   }
 
-  public AlphaBetaAgent(int maxDepth, int depth, Logger log) {
+  public AlphaBetaAgent(int maxDepth, Logger log) {
     super(log);
     this.maxDepth = maxDepth;
 
@@ -54,6 +59,9 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
     abTree.clear();
     abTree.setNode(new AbGameNode<>());
+
+    averageBranchingCount = 0;
+    averageBranching = 10;
 
     gameAbNodeUtilityComparator = Comparator.comparingDouble(AbGameNode::getUtility);
     gameAbNodeHeuristicComparator = Comparator.comparingDouble(AbGameNode::getHeuristic);
@@ -84,22 +92,34 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     }
     log.trace_("No");
 
-    //while (!shouldStopComputation()) {
-    log.deb("Labeling tree");
-    alphaCutOffs = 0;
-    betaCutOffs = 0;
-    labelAlphaBetaTree(abTree, determineDepth(),
-        Double.NEGATIVE_INFINITY,
-        Double.POSITIVE_INFINITY,
-        Double.NEGATIVE_INFINITY,
-        Double.POSITIVE_INFINITY);
-    //}
+    lastDepth = 1;
+    excessTime = 2;
+
+    int labeled = 1;
+    log.deb("Labeling tree 1 time");
+    while (!shouldStopComputation() && (excessTime > 1) && labeled <= lastDepth) {
+      depth = determineDepth();
+      if (labeled > 1) {
+        log.deb_("\r");
+        log.deb("Labeling tree " + labeled + " times");
+      }
+      log.deb_(" at depth " + depth);
+      alphaCutOffs = 0;
+      betaCutOffs = 0;
+      labelAlphaBetaTree(abTree, depth,
+          Double.NEGATIVE_INFINITY,
+          Double.POSITIVE_INFINITY,
+          Double.NEGATIVE_INFINITY,
+          Double.POSITIVE_INFINITY);
+      excessTime = (int) (TIMEOUT / Math.min(Math.max(System.nanoTime() - START_TIME, 1), TIMEOUT));
+      labeled++;
+    }
     log.debug_(
         String
             .format(", done with %d alpha cut-off%s, %d beta cut-off%s and %s left.",
                 alphaCutOffs, alphaCutOffs != 1 ? "s" : "",
                 betaCutOffs, betaCutOffs != 1 ? "s" : "",
-                Util.convertUnitToReadableString(TIMEOUT - (System.nanoTime() - START_TIME),
+                Util.convertUnitToReadableString(ACTUAL_TIMEOUT - (System.nanoTime() - START_TIME),
                     TimeUnit.NANOSECONDS, timeUnit)));
 
     if (abTree.isLeaf()) {
@@ -125,6 +145,8 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
       Game<A, ?> game = abGameNode.getGame();
       if (!game.isGameOver()) {
         Set<A> possibleActions = game.getPossibleActions();
+        averageBranching = (averageBranching * averageBranchingCount++ + possibleActions.size())
+            / averageBranchingCount;
         for (A possibleAction : possibleActions) {
           tree.add(new AbGameNode<>(game, possibleAction, minMaxWeights,
               abGameNode.getAbsoluteDepth() + 1));
@@ -280,7 +302,27 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
   }
 
+
+  private double branchingFactor() {
+    return 18.5855D * Math.exp(-0.0445847D * averageBranching);
+  }
+
+  private double timeFactor() {
+    return 0.195339D * Math.log(4.65015D * TimeUnit.NANOSECONDS.toSeconds(TIMEOUT));
+  }
+
+  private double excessTimeBonus() {
+    return 2.79055D * Math.log(0.715485D * excessTime);
+  }
+
   private int determineDepth() {
+
+    depth = (int) Math.max(Math.round(branchingFactor() * timeFactor()), 2);
+    depth = Math.max(lastDepth + (int) Math.round(excessTimeBonus()), depth);
+    depth = Math.min(depth, maxDepth);
+
+    lastDepth = depth;
+
     return Math.min(depth, maxDepth);
   }
 
