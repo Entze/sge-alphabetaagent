@@ -296,6 +296,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
           alphaCutOffs++;
         }
         tree.getNode().setEvaluated(false); //??
+        tree.dropChildren();
         stack.pop();
       }
     }
