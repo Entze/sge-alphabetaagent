@@ -1,6 +1,5 @@
 package dev.entze.sge.agent.alphabetaagent;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import dev.entze.sge.engine.Logger;

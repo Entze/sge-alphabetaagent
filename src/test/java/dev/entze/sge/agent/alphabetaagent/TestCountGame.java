@@ -11,16 +11,13 @@ import java.util.TreeSet;
 
 public class TestCountGame implements Game<Integer, Integer[]> {
 
-  private int currentPlayer = 0;
-  private final boolean canonical;
-  private final List<ActionRecord<Integer>> actionRecords;
-
-
   private static final Set<Integer> possibleActions = Collections
       .unmodifiableSet(new TreeSet<>(Arrays.asList(-1, 0, 1)));
-
+  private final boolean canonical;
+  private final List<ActionRecord<Integer>> actionRecords;
   private final int max;
   private final int min;
+  private int currentPlayer = 0;
   private int score;
 
   public TestCountGame() {
@@ -31,7 +28,8 @@ public class TestCountGame implements Game<Integer, Integer[]> {
     this(0, true, Collections.emptyList(), 0, min, max);
   }
 
-  public TestCountGame(int currentPlayer, boolean canonical, List<ActionRecord<Integer>> actionRecords,
+  public TestCountGame(int currentPlayer, boolean canonical,
+      List<ActionRecord<Integer>> actionRecords,
       int... board) {
     this.currentPlayer = currentPlayer;
     this.canonical = canonical;

@@ -27,6 +27,9 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
   private Comparator<AbGameNode<A>> gameAbNodeMoveComparator;
 
   private Comparator<Tree<AbGameNode<A>>> gameAbTreeComparator;
+  private Tree<AbGameNode<A>> abTree;
+  private int alphaCutOffs;
+  private int betaCutOffs;
 
   public AlphaBetaAgent() {
     this(64, 10, null);
@@ -35,7 +38,6 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
   public AlphaBetaAgent(Logger log) {
     this(64, 10, log);
   }
-
   public AlphaBetaAgent(int maxDepth, int depth, Logger log) {
     super(log);
     this.maxDepth = maxDepth;
@@ -44,11 +46,6 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     abTree = new DoubleLinkedTree<>();
 
   }
-
-  private Tree<AbGameNode<A>> abTree;
-
-  private int alphaCutOffs;
-  private int betaCutOffs;
 
   @Override
   public void setUp(int numberOfPlayers, int playerNumber) {
