@@ -38,6 +38,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
   public AlphaBetaAgent(Logger log) {
     this(64, 10, log);
   }
+
   public AlphaBetaAgent(int maxDepth, int depth, Logger log) {
     super(log);
     this.maxDepth = maxDepth;
@@ -73,7 +74,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
     log.tra("Searching for root of tree");
     Util.findRoot(abTree, game);
-    log.trace_(".done");
+    log.trace_(", done.");
 
     log.tra("Check if best move will eventually end game: ");
     if (sortPromisingCandidates(abTree, gameAbNodeComparator.reversed())) {
@@ -95,7 +96,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     //}
     log.debug_(
         String
-            .format(".done with %d alpha cut-off%s, %d beta cut-off%s and %s left.",
+            .format(", done with %d alpha cut-off%s, %d beta cut-off%s and %s left.",
                 alphaCutOffs, alphaCutOffs != 1 ? "s" : "",
                 betaCutOffs, betaCutOffs != 1 ? "s" : "",
                 Util.convertUnitToReadableString(TIMEOUT - (System.nanoTime() - START_TIME),
@@ -106,6 +107,13 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
       return Collections.max(game.getPossibleActions(),
           (o1, o2) -> gameComparator.compare(game.doAction(o1), game.doAction(o2)));
     }
+
+    if (!abTree.getNode().isEvaluated()) {
+      labelMinMaxTree(abTree, 1);
+    }
+
+    log.debug(String.format("Utility: %.1f, Heuristic: %.1f with a tree size of %d.",
+        abTree.getNode().getUtility(), abTree.getNode().getHeuristic(), abTree.size()));
 
     return Collections.max(abTree.getChildren(), gameAbTreeComparator).getNode().getGame()
         .getPreviousAction();
@@ -138,15 +146,67 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     if (!tree.isRoot()) {
       AbGameNode<A> parent = tree.getParent().getNode();
       if (parent.getGame().getCurrentPlayer() == playerNumber) {
-        parent.setUtility(Math.max(parent.getUtility(), node.getUtility()));
-        parent.setHeuristic(Math.max(parent.getHeuristic(), node.getHeuristic()));
+        if (parent.isEvaluated()) {
+          parent.setUtility(Math.max(parent.getUtility(), node.getUtility()));
+          parent.setHeuristic(Math.max(parent.getHeuristic(), node.getHeuristic()));
+        } else {
+          parent.setUtility(node.getUtility());
+          parent.setHeuristic(node.getHeuristic());
+        }
       } else {
-        parent.setUtility(Math.min(parent.getUtility(), node.getUtility()));
-        parent.setHeuristic(Math.min(parent.getHeuristic(), node.getHeuristic()));
+        if (parent.isEvaluated()) {
+          parent.setUtility(Math.min(parent.getUtility(), node.getUtility()));
+          parent.setHeuristic(Math.min(parent.getHeuristic(), node.getHeuristic()));
+        } else {
+          parent.setUtility(node.getUtility());
+          parent.setHeuristic(node.getHeuristic());
+        }
       }
       parent.setEvaluated(true);
     }
+  }
 
+  private void labelMinMaxTree(Tree<AbGameNode<A>> tree, int depth) {
+
+    Deque<Tree<AbGameNode<A>>> stack = new ArrayDeque<>();
+    stack.push(tree);
+
+    Tree<AbGameNode<A>> lastParent = null;
+
+    depth = Math.max(tree.getNode().getAbsoluteDepth() + depth, depth);
+
+    int checkDepth = 0;
+
+    while (!stack.isEmpty() && (checkDepth++ % 31 != 0 || !shouldStopComputation())) {
+
+      tree = stack.peek();
+
+      if (lastParent == tree || tree.getNode().getAbsoluteDepth() >= depth || !expandNode(tree)) {
+        evaluateNode(tree);
+
+        stack.pop();
+        lastParent = tree.getParent();
+      } else {
+
+        pushChildrenOntoStack(tree, stack);
+
+      }
+
+    }
+
+  }
+
+  private void pushChildrenOntoStack
+      (Tree<AbGameNode<A>> tree, Deque<Tree<AbGameNode<A>>> stack) {
+    if (tree.getNode().getGame().getCurrentPlayer() == playerNumber) {
+      tree.sort(gameAbNodeMoveComparator);
+    } else {
+      tree.sort(gameAbNodeMoveComparator.reversed());
+    }
+
+    for (Tree<AbGameNode<A>> child : tree.getChildren()) {
+      stack.push(child);
+    }
   }
 
   private void labelAlphaBetaTree(Tree<AbGameNode<A>> tree, int depth,
@@ -201,14 +261,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
         lastParent = tree.getParent();
       } else if (utilityAlpha < utilityBeta && heuristicAlpha < heuristicBeta) {
-        if (tree.getNode().getGame().getCurrentPlayer() == playerNumber) {
-          tree.sort(gameAbNodeMoveComparator);
-        } else {
-          tree.sort(gameAbNodeMoveComparator.reversed());
-        }
-        for (Tree<AbGameNode<A>> child : tree.getChildren()) {
-          stack.push(child);
-        }
+        pushChildrenOntoStack(tree, stack);
         utilityAlphas.push(utilityAlpha);
         heuristicAlphas.push(heuristicAlpha);
         utilityBetas.push(utilityBeta);
