@@ -72,7 +72,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
   @Override
   public A computeNextAction(G game, long computationTime, TimeUnit timeUnit) {
 
-    super.computeNextAction(game, computationTime, timeUnit);
+    super.setTimers(computationTime, timeUnit);
 
     log.tra("Searching for root of tree");
     Util.findRoot(abTree, game);
@@ -98,11 +98,11 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     //}
     log.debug_(
         String
-            .format(".done with %d alpha cut-off%s, %d beta cut-off%s and %d %s left.",
+            .format(".done with %d alpha cut-off%s, %d beta cut-off%s and %s left.",
                 alphaCutOffs, alphaCutOffs != 1 ? "s" : "",
                 betaCutOffs, betaCutOffs != 1 ? "s" : "",
-                timeUnit.convert(TIMEOUT - (System.nanoTime() - START_TIME), TimeUnit.NANOSECONDS),
-                timeUnit.toString().toLowerCase()));
+                Util.convertUnitToReadableString(System.nanoTime() - START_TIME,
+                    TimeUnit.NANOSECONDS, timeUnit)));
 
     if (abTree.isLeaf()) {
       log.debug("Could not find a move, choosing the next best greedy option.");
