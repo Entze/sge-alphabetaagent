@@ -309,8 +309,10 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
   }
 
   private double timeFactor() {
-    return 0.45512D * Math
-        .log(0.3D * TimeUnit.NANOSECONDS.toSeconds(TIMEOUT - (System.nanoTime() - START_TIME)));
+    return 0.364096D * Math
+        .log(0.394822D
+            * TimeUnit.NANOSECONDS.toSeconds(
+            TIMEOUT - (System.nanoTime() - START_TIME)));
   }
 
   private double excessTimeBonus() {
