@@ -25,8 +25,15 @@ public class AbGameNode<A> implements GameNode<A> {
 
   public AbGameNode(Game<A, ?> game, double[] weights, int absoluteDepth) {
     this(game,
-        Double.NEGATIVE_INFINITY * weights[game.getCurrentPlayer()],
-        Double.NEGATIVE_INFINITY * weights[game.getCurrentPlayer()], absoluteDepth);
+        Double.NEGATIVE_INFINITY * (
+            0 <= game.getCurrentPlayer() && game.getCurrentPlayer() < game.getNumberOfPlayers()
+                ? weights[game.getCurrentPlayer()]
+                : (-1)),
+        Double.NEGATIVE_INFINITY * (
+            0 <= game.getCurrentPlayer() && game.getCurrentPlayer() < game.getNumberOfPlayers()
+                ? weights[game.getCurrentPlayer()]
+                : (-1))
+        , absoluteDepth);
   }
 
   public AbGameNode(Game<A, ?> game, double utility, double heuristic,
