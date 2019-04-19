@@ -304,15 +304,15 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
 
   private double branchingFactor() {
-    return 18.5855D * Math.exp(-0.0445847D * averageBranching);
+    return 11.5022D * Math.exp(-0.0349878D * averageBranching);
   }
 
   private double timeFactor() {
-    return 0.195339D * Math.log(4.65015D * TimeUnit.NANOSECONDS.toSeconds(TIMEOUT));
+    return 0.45512D * Math.log(0.3D * TimeUnit.NANOSECONDS.toSeconds(TIMEOUT));
   }
 
   private double excessTimeBonus() {
-    return 2.79055D * Math.log(0.715485D * excessTime);
+    return 1.67433D * Math.log(0.90856D * excessTime);
   }
 
   private int determineDepth() {
