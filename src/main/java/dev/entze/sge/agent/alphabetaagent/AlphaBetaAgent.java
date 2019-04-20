@@ -48,14 +48,13 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     super(log);
     this.maxDepth = maxDepth;
 
-    this.depth = depth;
     abTree = new DoubleLinkedTree<>();
 
   }
 
   @Override
-  public void setUp(int numberOfPlayers, int playerNumber) {
-    super.setUp(numberOfPlayers, playerNumber);
+  public void setUp(int numberOfPlayers, int playerId) {
+    super.setUp(numberOfPlayers, playerId);
 
     abTree.clear();
     abTree.setNode(new AbGameNode<>());
@@ -167,7 +166,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
     if (!tree.isRoot()) {
       AbGameNode<A> parent = tree.getParent().getNode();
-      if (parent.getGame().getCurrentPlayer() == playerNumber) {
+      if (parent.getGame().getCurrentPlayer() == playerId) {
         if (parent.isEvaluated()) {
           parent.setUtility(Math.max(parent.getUtility(), node.getUtility()));
           parent.setHeuristic(Math.max(parent.getHeuristic(), node.getHeuristic()));
@@ -220,7 +219,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
   private void pushChildrenOntoStack
       (Tree<AbGameNode<A>> tree, Deque<Tree<AbGameNode<A>>> stack) {
-    if (tree.getNode().getGame().getCurrentPlayer() == playerNumber) {
+    if (tree.getNode().getGame().getCurrentPlayer() == playerId) {
       tree.sort(gameAbNodeMoveComparator);
     } else {
       tree.sort(gameAbNodeMoveComparator.reversed());
@@ -261,7 +260,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
         evaluateNode(tree);
 
         if (tree.isRoot()
-            || tree.getParent().getNode().getGame().getCurrentPlayer() == playerNumber) {
+            || tree.getParent().getNode().getGame().getCurrentPlayer() == playerId) {
           utilityAlpha = Math.max(utilityAlphas.peek(), tree.getNode().getUtility());
           heuristicAlpha = Math.max(heuristicAlphas.peek(), tree.getNode().getHeuristic());
           utilityBeta = utilityBetas.peek();
@@ -290,7 +289,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
         heuristicBetas.push(heuristicBeta);
       } else {
         if (tree.isRoot()
-            || tree.getParent().getNode().getGame().getCurrentPlayer() == playerNumber) {
+            || tree.getParent().getNode().getGame().getCurrentPlayer() == playerId) {
           betaCutOffs++;
         } else {
           alphaCutOffs++;
@@ -334,7 +333,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
       Comparator<AbGameNode<A>> comparator) {
 
     while (!tree.isLeaf() && tree.getNode().isEvaluated()) {
-      if (tree.getNode().getGame().getCurrentPlayer() == playerNumber) {
+      if (tree.getNode().getGame().getCurrentPlayer() == playerId) {
         tree.sort(gameAbNodeEvaluatedComparator.reversed().thenComparing(comparator));
       } else {
         tree.sort(gameAbNodeEvaluatedComparator.reversed().thenComparing(comparator.reversed()));
