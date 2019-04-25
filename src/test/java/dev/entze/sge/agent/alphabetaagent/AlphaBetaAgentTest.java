@@ -1,10 +1,11 @@
 package dev.entze.sge.agent.alphabetaagent;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import dev.entze.sge.engine.Logger;
 import dev.entze.sge.game.Game;
-import dev.entze.sge.game.Nim;
+import dev.entze.sge.game.Gib;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -37,9 +38,9 @@ public class AlphaBetaAgentTest {
   Game<Integer, Integer[]> testGame;
 
 
-  Nim nim;
-  AlphaBetaAgent<Nim, String> nimAgent0 = new AlphaBetaAgent<>(log);
-  AlphaBetaAgent<Nim, String> nimAgent1 = new AlphaBetaAgent<>(log);
+  Gib gib;
+  AlphaBetaAgent<Gib, String> gibAgent0 = new AlphaBetaAgent<>(log);
+  AlphaBetaAgent<Gib, String> gibAgent1 = new AlphaBetaAgent<>(log);
 
   @Before
   public void setUp() {
@@ -118,178 +119,178 @@ public class AlphaBetaAgentTest {
 
   @Test
   public void test_agent_2Players_depth1_2() {
-    nim = new Nim(Collections.singletonList("L"), Arrays.asList("L", "R"), 2);
-    nimAgent0.setUp(2, 0);
-    nimAgent1.setUp(2, 1);
+    gib = new Gib(Collections.singletonList("L"), Arrays.asList("L", "R"), 2);
+    gibAgent0.setUp(2, 0);
+    gibAgent1.setUp(2, 1);
 
-    while (!nim.isGameOver()) {
+    while (!gib.isGameOver()) {
       String action = null;
-      if (nim.getCurrentPlayer() == 0) {
-        action = nimAgent0.computeNextAction(nim, 60, TimeUnit.MINUTES);
-      } else if (nim.getCurrentPlayer() == 1) {
-        action = nimAgent1.computeNextAction(nim, 60, TimeUnit.MINUTES);
+      if (gib.getCurrentPlayer() == 0) {
+        action = gibAgent0.computeNextAction(gib, 60, TimeUnit.MINUTES);
+      } else if (gib.getCurrentPlayer() == 1) {
+        action = gibAgent1.computeNextAction(gib, 60, TimeUnit.MINUTES);
       }
-      nim = (Nim) nim.doAction(action);
+      gib = (Gib) gib.doAction(action);
     }
 
-    assertArrayEquals(new double[] {1, 0}, nim.getGameUtilityValue(), 0.001D);
+    assertArrayEquals(new double[] {1, 0}, gib.getGameUtilityValue(), 0.001D);
 
   }
 
   @Test
   public void test_agent_2Players_depth2_2() {
-    nim = new Nim(Arrays.asList("LL", "LR"), Arrays.asList("L", "R"), 2);
-    nimAgent0.setUp(2, 0);
-    nimAgent1.setUp(2, 1);
+    gib = new Gib(Arrays.asList("LL", "LR"), Arrays.asList("L", "R"), 2);
+    gibAgent0.setUp(2, 0);
+    gibAgent1.setUp(2, 1);
 
-    while (!nim.isGameOver()) {
+    while (!gib.isGameOver()) {
       String action = null;
-      if (nim.getCurrentPlayer() == 0) {
-        action = nimAgent0.computeNextAction(nim, 60, TimeUnit.SECONDS);
-      } else if (nim.getCurrentPlayer() == 1) {
-        action = nimAgent1.computeNextAction(nim, 60, TimeUnit.SECONDS);
+      if (gib.getCurrentPlayer() == 0) {
+        action = gibAgent0.computeNextAction(gib, 60, TimeUnit.SECONDS);
+      } else if (gib.getCurrentPlayer() == 1) {
+        action = gibAgent1.computeNextAction(gib, 60, TimeUnit.SECONDS);
       }
-      nim = (Nim) nim.doAction(action);
+      gib = (Gib) gib.doAction(action);
     }
 
-    assertArrayEquals(new double[] {1D / 2D, 1D / 2D}, nim.getGameUtilityValue(), 0.001D);
+    assertArrayEquals(new double[] {1D / 2D, 1D / 2D}, gib.getGameUtilityValue(), 0.001D);
 
   }
 
   @Test
   public void test_agent_2Players_depth3_1() {
-    nim = new Nim(Arrays.asList("LLL", "LLR", "LRL", "RLR"), Arrays.asList("L", "R"), 2);
-    nimAgent0.setUp(2, 0);
-    nimAgent1.setUp(2, 1);
+    gib = new Gib(Arrays.asList("LLL", "LLR", "LRL", "RLR"), Arrays.asList("L", "R"), 2);
+    gibAgent0.setUp(2, 0);
+    gibAgent1.setUp(2, 1);
 
-    while (!nim.isGameOver()) {
+    while (!gib.isGameOver()) {
       String action = null;
-      if (nim.getCurrentPlayer() == 0) {
-        action = nimAgent0.computeNextAction(nim, 60, TimeUnit.SECONDS);
-      } else if (nim.getCurrentPlayer() == 1) {
-        action = nimAgent1.computeNextAction(nim, 60, TimeUnit.SECONDS);
+      if (gib.getCurrentPlayer() == 0) {
+        action = gibAgent0.computeNextAction(gib, 60, TimeUnit.SECONDS);
+      } else if (gib.getCurrentPlayer() == 1) {
+        action = gibAgent1.computeNextAction(gib, 60, TimeUnit.SECONDS);
       }
-      nim = (Nim) nim.doAction(action);
+      gib = (Gib) gib.doAction(action);
     }
 
-    assertArrayEquals(new double[] {1, 0}, nim.getGameUtilityValue(), 0.001D);
+    assertArrayEquals(new double[] {1, 0}, gib.getGameUtilityValue(), 0.001D);
 
   }
 
   @Test
   public void test_agent_2Players_depth4_0() {
-    nim = new Nim(Arrays.asList("LLLL", "LLLR", "LLRL", "LRLR", "RLLL", "RLLR", "RLRL", "RRLR"),
+    gib = new Gib(Arrays.asList("LLLL", "LLLR", "LLRL", "LRLR", "RLLL", "RLLR", "RLRL", "RRLR"),
         Arrays.asList("L", "R"), 2);
-    nimAgent0.setUp(2, 0);
-    nimAgent1.setUp(2, 1);
+    gibAgent0.setUp(2, 0);
+    gibAgent1.setUp(2, 1);
 
-    while (!nim.isGameOver()) {
+    while (!gib.isGameOver()) {
       String action = null;
-      if (nim.getCurrentPlayer() == 0) {
-        action = nimAgent0.computeNextAction(nim, 60, TimeUnit.SECONDS);
-      } else if (nim.getCurrentPlayer() == 1) {
-        action = nimAgent1.computeNextAction(nim, 60, TimeUnit.SECONDS);
+      if (gib.getCurrentPlayer() == 0) {
+        action = gibAgent0.computeNextAction(gib, 60, TimeUnit.SECONDS);
+      } else if (gib.getCurrentPlayer() == 1) {
+        action = gibAgent1.computeNextAction(gib, 60, TimeUnit.SECONDS);
       }
-      nim = (Nim) nim.doAction(action);
+      gib = (Gib) gib.doAction(action);
     }
 
-    assertArrayEquals(new double[] {0, 1}, nim.getGameUtilityValue(), 0.001D);
+    assertArrayEquals(new double[] {0, 1}, gib.getGameUtilityValue(), 0.001D);
 
   }
 
   @Test
   public void test_agent_2Players_depth3_2() {
-    nim = new Nim(Arrays
+    gib = new Gib(Arrays
         .asList("LL", "LM", "LR", "MLL", "MLM", "MLR", "MMM", "MRL", "MRM", "MRR", "RL", "RM",
             "RR"),
         Arrays.asList("L", "M", "R"), 2);
-    nimAgent0.setUp(2, 0);
-    nimAgent1.setUp(2, 1);
+    gibAgent0.setUp(2, 0);
+    gibAgent1.setUp(2, 1);
 
-    while (!nim.isGameOver()) {
+    while (!gib.isGameOver()) {
       String action = null;
-      if (nim.getCurrentPlayer() == 0) {
-        action = nimAgent0.computeNextAction(nim, 60, TimeUnit.SECONDS);
-      } else if (nim.getCurrentPlayer() == 1) {
-        action = nimAgent1.computeNextAction(nim, 60, TimeUnit.SECONDS);
+      if (gib.getCurrentPlayer() == 0) {
+        action = gibAgent0.computeNextAction(gib, 60, TimeUnit.SECONDS);
+      } else if (gib.getCurrentPlayer() == 1) {
+        action = gibAgent1.computeNextAction(gib, 60, TimeUnit.SECONDS);
       }
-      nim = (Nim) nim.doAction(action);
+      gib = (Gib) gib.doAction(action);
     }
 
-    assertArrayEquals(new double[] {1, 0}, nim.getGameUtilityValue(), 0.001D);
+    assertArrayEquals(new double[] {1, 0}, gib.getGameUtilityValue(), 0.001D);
 
   }
 
   @Test
   public void test_agent_2Players_depth5_0() {
-    nim = new Nim(Arrays
+    gib = new Gib(Arrays
         .asList(
             "LLLLL", "LLLML", "LLLRL", "LMLLL", "LMLML", "LMLRL", "LRLLL", "LRLML", "LRLRL"
         ),
         Arrays.asList("L", "M", "R"), 2);
-    nimAgent0.setUp(2, 0);
-    nimAgent1.setUp(2, 1);
+    gibAgent0.setUp(2, 0);
+    gibAgent1.setUp(2, 1);
 
-    while (!nim.isGameOver()) {
+    while (!gib.isGameOver()) {
       String action = null;
-      if (nim.getCurrentPlayer() == 0) {
-        action = nimAgent0.computeNextAction(nim, 60, TimeUnit.SECONDS);
+      if (gib.getCurrentPlayer() == 0) {
+        action = gibAgent0.computeNextAction(gib, 60, TimeUnit.SECONDS);
         assertEquals("L", action);
-      } else if (nim.getCurrentPlayer() == 1) {
-        action = nimAgent1.computeNextAction(nim, 60, TimeUnit.SECONDS);
+      } else if (gib.getCurrentPlayer() == 1) {
+        action = gibAgent1.computeNextAction(gib, 60, TimeUnit.SECONDS);
       }
-      nim = (Nim) nim.doAction(action);
+      gib = (Gib) gib.doAction(action);
     }
 
-    assertArrayEquals(new double[] {1, 0}, nim.getGameUtilityValue(), 0.001D);
+    assertArrayEquals(new double[] {1, 0}, gib.getGameUtilityValue(), 0.001D);
   }
 
   @Test
   public void test_agent_2Players_depth5_1() {
-    nim = new Nim(Arrays
+    gib = new Gib(Arrays
         .asList(
             "RLRLR", "RLRMR", "RLRRR", "RMRLR", "RMRMR", "RMRRR", "RRRLR", "RRRMR", "RRRRR"
         ),
         Arrays.asList("L", "M", "R"), 2);
-    nimAgent0.setUp(2, 0);
-    nimAgent1.setUp(2, 1);
+    gibAgent0.setUp(2, 0);
+    gibAgent1.setUp(2, 1);
 
-    while (!nim.isGameOver()) {
+    while (!gib.isGameOver()) {
       String action = null;
-      if (nim.getCurrentPlayer() == 0) {
-        action = nimAgent0.computeNextAction(nim, 60, TimeUnit.SECONDS);
+      if (gib.getCurrentPlayer() == 0) {
+        action = gibAgent0.computeNextAction(gib, 60, TimeUnit.SECONDS);
         assertEquals("R", action);
-      } else if (nim.getCurrentPlayer() == 1) {
+      } else if (gib.getCurrentPlayer() == 1) {
         action = "M";
       }
-      nim = (Nim) nim.doAction(action);
+      gib = (Gib) gib.doAction(action);
     }
 
-    assertArrayEquals(new double[] {1, 0}, nim.getGameUtilityValue(), 0.001D);
+    assertArrayEquals(new double[] {1, 0}, gib.getGameUtilityValue(), 0.001D);
   }
 
   @Test
   public void test_agent_2Players_depth5_2() {
-    nim = new Nim(Arrays
+    gib = new Gib(Arrays
         .asList(
             "LLLL", "LLLR", "LLRL", "LLRR", "LRLL", "LRLR", "LRRL", "LRRR", "RR", "RLLL", "RLLRLL",
             "RLLRR"
         ),
         Arrays.asList("L", "R"), 2);
-    nimAgent1.setUp(2, 1);
+    gibAgent1.setUp(2, 1);
 
     int round = 0;
-    while (!nim.isGameOver()) {
+    while (!gib.isGameOver()) {
       String action = null;
-      if (nim.getCurrentPlayer() == 0) {
+      if (gib.getCurrentPlayer() == 0) {
         action = new String[] {"R", "L", "R"}[round++];
-      } else if (nim.getCurrentPlayer() == 1) {
-        action = nimAgent1.computeNextAction(nim, 60, TimeUnit.SECONDS);
+      } else if (gib.getCurrentPlayer() == 1) {
+        action = gibAgent1.computeNextAction(gib, 60, TimeUnit.SECONDS);
       }
-      nim = (Nim) nim.doAction(action);
+      gib = (Gib) gib.doAction(action);
     }
 
-    assertArrayEquals(new double[] {0, 1}, nim.getGameUtilityValue(), 0.001D);
+    assertArrayEquals(new double[] {0, 1}, gib.getGameUtilityValue(), 0.001D);
   }
 
 

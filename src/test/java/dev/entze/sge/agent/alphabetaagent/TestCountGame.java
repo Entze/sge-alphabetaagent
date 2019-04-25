@@ -106,7 +106,7 @@ public class TestCountGame implements Game<Integer, Integer[]> {
   }
 
   @Override
-  public List<ActionRecord<Integer>> getPreviousActionRecords() {
+  public List<ActionRecord<Integer>> getActionRecords() {
     return Collections.unmodifiableList(actionRecords);
   }
 

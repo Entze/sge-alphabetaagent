@@ -11,6 +11,7 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -80,8 +81,12 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     super.setTimers(computationTime, timeUnit);
 
     log.tra("Searching for root of tree");
-    Util.findRoot(abTree, game);
-    log.trace_(", done.");
+    boolean foundRoot = Util.findRoot(abTree, game);
+    if (foundRoot) {
+      log.trace_(", done.");
+    } else {
+      log.trace_(", failed.");
+    }
 
     log.tra("Check if best move will eventually end game: ");
     if (sortPromisingCandidates(abTree, gameAbNodeComparator.reversed())) {
@@ -155,13 +160,54 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
     return !tree.isLeaf();
   }
 
+  private boolean appearsQuiet(Tree<AbGameNode<A>> tree) {
+    if (tree.isRoot()) {
+      return true;
+    }
+
+    List<Tree<AbGameNode<A>>> siblings = tree.getParent().getChildren();
+
+    double min = Collections.min(siblings, gameAbTreeComparator).getNode().getUtility();
+    double max = Collections.max(siblings, gameAbTreeComparator).getNode().getUtility();
+
+    return siblings.size() <= 2 || (min < tree.getNode().getGame().getUtilityValue()
+        && tree.getNode().getGame().getUtilityValue() < max);
+  }
+
+  private void quiescence(Tree<AbGameNode<A>> tree) {
+
+    Tree<AbGameNode<A>> originalTree = tree;
+
+    boolean isQuiet = false;
+    AbGameNode<A> node = tree.getNode();
+    while (!node.isEvaluated()) {
+      Game<A, ?> game = node.getGame();
+      if (game.isGameOver() || (game.getCurrentPlayer() >= 0 && (isQuiet || appearsQuiet(tree)))) {
+        node.setUtility(game.getUtilityValue(minMaxWeights));
+        node.setHeuristic(game.getHeuristicValue(minMaxWeights));
+        node.setEvaluated(true);
+      } else {
+        expandNode(tree);
+        tree.sort(gameAbNodeComparator);
+        tree = tree.getChild(tree.getChildren().size() / 2);
+        isQuiet = true;
+      }
+      node = tree.getNode();
+    }
+
+    AbGameNode<A> originalNode = originalTree.getNode();
+    if (!originalNode.isEvaluated()) {
+      originalNode.setUtility(node.getUtility());
+      originalNode.setHeuristic(node.getHeuristic());
+      originalNode.setEvaluated(true);
+    }
+
+  }
+
   private void evaluateNode(Tree<AbGameNode<A>> tree) {
     AbGameNode<A> node = tree.getNode();
-    Game<A, ?> game = node.getGame();
-    if (tree.isLeaf() || game.isGameOver()) {
-      node.setUtility(game.getUtilityValue(minMaxWeights));
-      node.setHeuristic(game.getHeuristicValue(minMaxWeights));
-      node.setEvaluated(true);
+    if (tree.isLeaf()) {
+      quiescence(tree);
     }
 
     if (!tree.isRoot()) {
@@ -332,7 +378,10 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
   private boolean sortPromisingCandidates(Tree<AbGameNode<A>> tree,
       Comparator<AbGameNode<A>> comparator) {
 
-    while (!tree.isLeaf() && tree.getNode().isEvaluated()) {
+    boolean isDetermined = true;
+    while (!tree.isLeaf() && tree.getNode().isEvaluated() && isDetermined) {
+      isDetermined = isDetermined && tree.getChildren().stream()
+          .allMatch(c -> c.getNode().getGame().getCurrentPlayer() >= 0);
       if (tree.getNode().getGame().getCurrentPlayer() == playerId) {
         tree.sort(gameAbNodeEvaluatedComparator.reversed().thenComparing(comparator));
       } else {
