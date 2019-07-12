@@ -212,6 +212,10 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
     if (!tree.isRoot()) {
       AbGameNode<A> parent = tree.getParent().getNode();
+      /* if (parent.getGame().getCurrentPlayer() < 0) {
+         simulate Actions
+         pick most frequent Action
+       else */
       if (parent.getGame().getCurrentPlayer() == playerId) {
         if (parent.isEvaluated()) {
           parent.setUtility(Math.max(parent.getUtility(), node.getUtility()));
@@ -340,7 +344,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
         } else {
           alphaCutOffs++;
         }
-        tree.getNode().setEvaluated(false); //??
+        tree.getNode().setEvaluated(false);
         tree.dropChildren();
         stack.pop();
       }
