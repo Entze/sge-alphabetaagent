@@ -212,29 +212,42 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
     if (!tree.isRoot()) {
       AbGameNode<A> parent = tree.getParent().getNode();
-      /* if (parent.getGame().getCurrentPlayer() < 0) {
-         simulate Actions
-         pick most frequent Action
-       else */
-      if (parent.getGame().getCurrentPlayer() == playerId) {
-        if (parent.isEvaluated()) {
-          parent.setUtility(Math.max(parent.getUtility(), node.getUtility()));
-          parent.setHeuristic(Math.max(parent.getHeuristic(), node.getHeuristic()));
-        } else {
-          parent.setUtility(node.getUtility());
-          parent.setHeuristic(node.getHeuristic());
+      int parentCurrentPlayer = parent.getGame().getCurrentPlayer();
+      double utility = node.getUtility();
+      double heuristic = node.getHeuristic();
+      double weight = 1;
+      double parentUtility;
+      double parentHeuristic;
+
+      if (parentCurrentPlayer < 0) {
+        if (!parent.areSimulationDone()) {
+          int nrOfSiblings = tree.getParent().getChildren().size();
+          parent.simulateDetermineAction(
+              Math.max((int) Math.round(nrOfSiblings * simulationTimeFactor()), nrOfSiblings));
         }
+        weight = parent.frequencyOf(node.getGame().getPreviousAction());
+      }
+
+      if (!parent.isEvaluated()) {
+        parent.setUtility(utility * weight);
+        parent.setHeuristic(heuristic * weight);
       } else {
-        if (parent.isEvaluated()) {
-          parent.setUtility(Math.min(parent.getUtility(), node.getUtility()));
-          parent.setHeuristic(Math.min(parent.getHeuristic(), node.getHeuristic()));
+        parentUtility = parent.getUtility();
+        parentHeuristic = parent.getHeuristic();
+        if (parentCurrentPlayer < 0) {
+          parent.setUtility(parentUtility + weight * utility);
+          parent.setHeuristic(parentHeuristic + weight * heuristic);
+        } else if (parentCurrentPlayer == playerId) {
+          parent.setUtility(Math.max(parentUtility, utility));
+          parent.setHeuristic(Math.max(parentHeuristic, heuristic));
         } else {
-          parent.setUtility(node.getUtility());
-          parent.setHeuristic(node.getHeuristic());
+          parent.setUtility(Math.min(parentUtility, utility));
+          parent.setHeuristic(Math.min(parentHeuristic, heuristic));
         }
       }
       parent.setEvaluated(true);
     }
+
   }
 
   private void labelMinMaxTree(Tree<AbGameNode<A>> tree, int depth) {
@@ -352,6 +365,10 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
   }
 
+  private double simulationTimeFactor() {
+    return 21.0815D * Math
+        .log(1.57606D * TimeUnit.NANOSECONDS.toSeconds(TIMEOUT - (System.nanoTime() - START_TIME)));
+  }
 
   private double branchingFactor() {
     return 11.5022D * Math.exp(-0.0349878D * averageBranching);

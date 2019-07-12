@@ -2,6 +2,8 @@ package dev.entze.sge.agent.alphabetaagent;
 
 import dev.entze.sge.game.Game;
 import dev.entze.sge.util.node.GameNode;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AbGameNode<A> implements GameNode<A> {
 
@@ -10,6 +12,8 @@ public class AbGameNode<A> implements GameNode<A> {
   private double heuristic;
   private int absoluteDepth;
   private boolean evaluated;
+
+  private final Map<A, Integer> actionFrequency;
 
   public AbGameNode() {
     this(null,
@@ -43,6 +47,11 @@ public class AbGameNode<A> implements GameNode<A> {
     this.heuristic = heuristic;
     this.absoluteDepth = absoluteDepth;
     this.evaluated = false;
+    if (game != null && game.getCurrentPlayer() < 0) {
+      actionFrequency = new HashMap<>();
+    } else {
+      actionFrequency = null;
+    }
   }
 
   @Override
@@ -86,4 +95,39 @@ public class AbGameNode<A> implements GameNode<A> {
   public void setEvaluated(boolean evaluated) {
     this.evaluated = evaluated;
   }
+
+  public void simulateDetermineAction() {
+    A action = game.determineNextAction();
+    if (action != null && actionFrequency != null) {
+      actionFrequency.compute(action, (k, v) -> v == null ? 1 : v + 1);
+    }
+  }
+
+  public void simulateDetermineAction(int times) {
+    for (int i = 0; i < times; i++) {
+      simulateDetermineAction();
+    }
+  }
+
+  public boolean areSimulationDone() {
+    return actionFrequency != null && !actionFrequency.isEmpty();
+  }
+
+  public int simulationsDone() {
+    if (actionFrequency == null) {
+      return 0;
+    }
+    return actionFrequency.values().stream().reduce(0, Integer::sum);
+  }
+
+  public double frequencyOf(A action) {
+    if (actionFrequency == null) {
+      return 0D;
+    }
+    double all = simulationsDone();
+    double n = actionFrequency.getOrDefault(action, 0);
+
+    return n / all;
+  }
+
 }
