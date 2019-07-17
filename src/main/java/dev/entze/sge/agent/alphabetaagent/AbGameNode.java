@@ -2,8 +2,10 @@ package dev.entze.sge.agent.alphabetaagent;
 
 import dev.entze.sge.game.Game;
 import dev.entze.sge.util.node.GameNode;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class AbGameNode<A> implements GameNode<A> {
 
@@ -122,12 +124,32 @@ public class AbGameNode<A> implements GameNode<A> {
 
   public double frequencyOf(A action) {
     if (actionFrequency == null) {
-      return 0D;
+      return 1D;
     }
     double all = simulationsDone();
     double n = actionFrequency.getOrDefault(action, 0);
 
     return n / all;
+  }
+
+  public A mostFrequentAction() {
+    A action = null;
+    if (actionFrequency != null) {
+      Entry<A, Integer> frequency = actionFrequency.entrySet().stream()
+          .max(Comparator.comparingInt(Entry::getValue)).orElse(null);
+      if (frequency != null) {
+        action = frequency.getKey();
+      }
+    }
+    return action;
+  }
+
+  public boolean isMostFrequentAction(A action) {
+    if (actionFrequency != null) {
+      final int frequency = actionFrequency.getOrDefault(action, 0);
+      return actionFrequency.values().stream().noneMatch(f -> f > frequency);
+    }
+    return false;
   }
 
 }

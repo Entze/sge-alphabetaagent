@@ -2,6 +2,7 @@ package dev.entze.sge.agent.alphabetaagent;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import dev.entze.sge.engine.Logger;
 import dev.entze.sge.game.Game;
@@ -103,19 +104,24 @@ public class AlphaBetaAgentTest {
   }
 
   @Test
-  public void test_agent_2Players_depth99_0() {
-    int player = 0;
-    testGame = new TestCountGame(player, true, Collections.emptyList(), 0, -99, 99);
-    agent.setUp(2, player);
-    while (!testGame.isGameOver()) {
-      assertEquals(1 - 2 * player, (int) agent.computeNextAction(testGame, 10, TimeUnit.SECONDS));
-      testGame = testGame.doAction(1 - 2 * player);
-      if (!testGame.isGameOver()) {
-        testGame = testGame.doAction(0);
-      }
-    }
-  }
+  public void test_agent_indeterminant_1Player() {
+    TestDiceGame game = new TestDiceGame();
+    AlphaBetaAgent<TestDiceGame, Integer> agent = new AlphaBetaAgent<>(log);
+    agent.setUp(1, 0);
 
+    while (!game.isGameOver()) {
+      Integer action;
+      if (game.getCurrentPlayer() >= 0) {
+        action = agent.computeNextAction(game, 1000, TimeUnit.SECONDS);
+        assertTrue(5 <= action && action <= 9);
+      } else {
+        action = game.determineNextAction();
+      }
+
+      game = (TestDiceGame) game.doAction(action);
+    }
+
+  }
 
   @Test
   public void test_agent_2Players_depth1_2() {

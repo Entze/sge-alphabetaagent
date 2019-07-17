@@ -215,29 +215,27 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
       int parentCurrentPlayer = parent.getGame().getCurrentPlayer();
       double utility = node.getUtility();
       double heuristic = node.getHeuristic();
-      double weight = 1;
       double parentUtility;
       double parentHeuristic;
 
-      if (parentCurrentPlayer < 0) {
+      if (!parent.isEvaluated()) {
+        parent.setUtility(utility);
+        parent.setHeuristic(heuristic);
+      } else if (parentCurrentPlayer < 0) {
+        int nrOfSiblings = tree.getParent().getChildren().size();
         if (!parent.areSimulationDone()) {
-          int nrOfSiblings = tree.getParent().getChildren().size();
           parent.simulateDetermineAction(
               Math.max((int) Math.round(nrOfSiblings * simulationTimeFactor()), nrOfSiblings));
         }
-        weight = parent.frequencyOf(node.getGame().getPreviousAction());
-      }
-
-      if (!parent.isEvaluated()) {
-        parent.setUtility(utility * weight);
-        parent.setHeuristic(heuristic * weight);
+        parent.simulateDetermineAction(nrOfSiblings);
+        if (parent.isMostFrequentAction(node.getGame().getPreviousAction())) {
+          parent.setUtility(utility);
+          parent.setHeuristic(heuristic);
+        }
       } else {
         parentUtility = parent.getUtility();
         parentHeuristic = parent.getHeuristic();
-        if (parentCurrentPlayer < 0) {
-          parent.setUtility(parentUtility + weight * utility);
-          parent.setHeuristic(parentHeuristic + weight * heuristic);
-        } else if (parentCurrentPlayer == playerId) {
+        if (parentCurrentPlayer == playerId) {
           parent.setUtility(Math.max(parentUtility, utility));
           parent.setHeuristic(Math.max(parentHeuristic, heuristic));
         } else {
@@ -344,13 +342,16 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
         }
 
         lastParent = tree.getParent();
-      } else if (utilityAlpha < utilityBeta && heuristicAlpha < heuristicBeta) {
+      } else if ((utilityAlpha < utilityBeta && heuristicAlpha < heuristicBeta) || (
+          tree.getParent() != null
+              && tree.getParent().getNode().getGame().getCurrentPlayer() < 0)) {
         pushChildrenOntoStack(tree, stack);
         utilityAlphas.push(utilityAlpha);
         heuristicAlphas.push(heuristicAlpha);
         utilityBetas.push(utilityBeta);
         heuristicBetas.push(heuristicBeta);
-      } else {
+      } else if (tree.getParent() != null
+          && tree.getParent().getNode().getGame().getCurrentPlayer() >= 0) {
         if (tree.isRoot()
             || tree.getParent().getNode().getGame().getCurrentPlayer() == playerId) {
           betaCutOffs++;
