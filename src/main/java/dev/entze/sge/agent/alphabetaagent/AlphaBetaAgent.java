@@ -18,6 +18,10 @@ import java.util.concurrent.TimeUnit;
 public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G, A> implements
     GameAgent<G, A> {
 
+  private static int INSTANCE_NR_COUNTER = 1;
+
+  private final int instanceNr;
+
   private final int maxDepth;
   private int lastDepth;
   private int depth;
@@ -51,6 +55,7 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
     abTree = new DoubleLinkedTree<>();
 
+    this.instanceNr = INSTANCE_NR_COUNTER++;
   }
 
   @Override
@@ -416,4 +421,8 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
   }
 
+  @Override
+  public String toString() {
+    return String.format("%s%d", "AlphaBetaAgent#", instanceNr);
+  }
 }
