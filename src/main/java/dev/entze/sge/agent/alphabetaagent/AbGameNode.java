@@ -9,13 +9,12 @@ import java.util.Map.Entry;
 
 public class AbGameNode<A> implements GameNode<A> {
 
+  private final Map<A, Integer> actionFrequency;
   private Game<A, ?> game;
   private double utility;
   private double heuristic;
   private int absoluteDepth;
   private boolean evaluated;
-
-  private final Map<A, Integer> actionFrequency;
 
   public AbGameNode() {
     this(null,
