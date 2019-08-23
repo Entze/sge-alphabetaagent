@@ -423,6 +423,9 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
   @Override
   public String toString() {
-    return String.format("%s%d", "AlphaBetaAgent#", instanceNr);
+    if (instanceNr > 1 || AlphaBetaAgent.INSTANCE_NR_COUNTER > 2) {
+      return String.format("%s%d", "AlphaBetaAgent#", instanceNr);
+    }
+    return "AlphaBetaAgent";
   }
 }
