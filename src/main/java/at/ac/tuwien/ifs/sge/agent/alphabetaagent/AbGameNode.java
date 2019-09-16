@@ -1,4 +1,4 @@
-package dev.entze.sge.agent.alphabetaagent;
+package at.ac.tuwien.ifs.sge.agent.alphabetaagent;
 
 import at.ac.tuwien.ifs.sge.game.Game;
 import at.ac.tuwien.ifs.sge.util.node.GameNode;
