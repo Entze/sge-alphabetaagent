@@ -113,7 +113,7 @@ public class AlphaBetaAgentTest {
       Integer action;
       if (game.getCurrentPlayer() >= 0) {
         action = agent.computeNextAction(game, 1000, TimeUnit.SECONDS);
-        assertTrue(5 <= action && action <= 9);
+        assertTrue("action: " + action, 5 <= action && action <= 9);
       } else {
         action = game.determineNextAction();
       }
