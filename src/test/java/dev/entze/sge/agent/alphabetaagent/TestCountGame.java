@@ -1,7 +1,7 @@
 package dev.entze.sge.agent.alphabetaagent;
 
-import dev.entze.sge.game.ActionRecord;
-import dev.entze.sge.game.Game;
+import at.ac.tuwien.ifs.sge.game.ActionRecord;
+import at.ac.tuwien.ifs.sge.game.Game;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
