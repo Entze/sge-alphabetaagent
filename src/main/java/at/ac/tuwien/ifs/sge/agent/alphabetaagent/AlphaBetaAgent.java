@@ -85,34 +85,34 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
     super.setTimers(computationTime, timeUnit);
 
-    log.tra("Searching for root of tree");
+    log.tra_("Searching for root of tree");
     boolean foundRoot = Util.findRoot(abTree, game);
     if (foundRoot) {
-      log.trace_(", done.");
+      log._trace(", done.");
     } else {
-      log.trace_(", failed.");
+      log._trace(", failed.");
     }
 
-    log.tra("Check if best move will eventually end game: ");
+    log.tra_("Check if best move will eventually end game: ");
     if (sortPromisingCandidates(abTree, gameAbNodeComparator.reversed())) {
-      log.trace_("Yes");
+      log._trace("Yes");
       return Collections.max(abTree.getChildren(), gameAbTreeComparator).getNode().getGame()
           .getPreviousAction();
     }
-    log.trace_("No");
+    log._trace("No");
 
     lastDepth = 1;
     excessTime = 2;
 
     int labeled = 1;
-    log.deb("Labeling tree 1 time");
+    log.deb_("Labeling tree 1 time");
     while (!shouldStopComputation() && (excessTime > 1) && labeled <= lastDepth) {
       depth = determineDepth();
       if (labeled > 1) {
-        log.deb_("\r");
-        log.deb("Labeling tree " + labeled + " times");
+        log._deb_("\r");
+        log.deb_("Labeling tree " + labeled + " times");
       }
-      log.deb_(" at depth " + depth);
+      log._deb_(" at depth " + depth);
       alphaCutOffs = 0;
       betaCutOffs = 0;
       labelAlphaBetaTree(abTree, depth,
@@ -123,13 +123,11 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
       excessTime = (int) (TIMEOUT / Math.min(Math.max(System.nanoTime() - START_TIME, 1), TIMEOUT));
       labeled++;
     }
-    log.debug_(
-        String
-            .format(", done with %d alpha cut-off%s, %d beta cut-off%s and %s left.",
-                alphaCutOffs, alphaCutOffs != 1 ? "s" : "",
-                betaCutOffs, betaCutOffs != 1 ? "s" : "",
-                Util.convertUnitToReadableString(ACTUAL_TIMEOUT - (System.nanoTime() - START_TIME),
-                    TimeUnit.NANOSECONDS, timeUnit)));
+    log._debugf(", done with %d alpha cut-off%s, %d beta cut-off%s and %s left.",
+        alphaCutOffs, alphaCutOffs != 1 ? "s" : "",
+        betaCutOffs, betaCutOffs != 1 ? "s" : "",
+        Util.convertUnitToReadableString(ACTUAL_TIMEOUT - (System.nanoTime() - START_TIME),
+            TimeUnit.NANOSECONDS, timeUnit));
 
     if (abTree.isLeaf()) {
       log.debug("Could not find a move, choosing the next best greedy option.");
@@ -141,8 +139,8 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
       labelMinMaxTree(abTree, 1);
     }
 
-    log.debug(String.format("Utility: %.1f, Heuristic: %.1f with a tree size of %d.",
-        abTree.getNode().getUtility(), abTree.getNode().getHeuristic(), abTree.size()));
+    log.debugf("Utility: %.1f, Heuristic: %.1f with a tree size of %d.",
+        abTree.getNode().getUtility(), abTree.getNode().getHeuristic(), abTree.size());
 
     return Collections.max(abTree.getChildren(), gameAbTreeComparator).getNode().getGame()
         .getPreviousAction();
