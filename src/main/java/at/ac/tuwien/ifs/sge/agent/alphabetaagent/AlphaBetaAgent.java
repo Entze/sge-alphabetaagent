@@ -129,6 +129,9 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
         Util.convertUnitToReadableString(ACTUAL_TIMEOUT - (System.nanoTime() - START_TIME),
             TimeUnit.NANOSECONDS, timeUnit));
 
+    log.tracef("Tree has %d nodes, maximum depth %d, and an average branching factor of %s",
+        abTree.size(), depth, Util.convertDoubleToMinimalString(averageBranching, 2));
+
     if (abTree.isLeaf()) {
       log.debug("Could not find a move, choosing the next best greedy option.");
       return Collections.max(game.getPossibleActions(),
@@ -139,8 +142,8 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
       labelMinMaxTree(abTree, 1);
     }
 
-    log.debugf("Utility: %.1f, Heuristic: %.1f with a tree size of %d.",
-        abTree.getNode().getUtility(), abTree.getNode().getHeuristic(), abTree.size());
+    log.debugf("Utility: %.1f, Heuristic: %.1f",
+        abTree.getNode().getUtility(), abTree.getNode().getHeuristic());
 
     return Collections.max(abTree.getChildren(), gameAbTreeComparator).getNode().getGame()
         .getPreviousAction();
@@ -369,24 +372,41 @@ public class AlphaBetaAgent<G extends Game<A, ?>, A> extends AbstractGameAgent<G
 
   }
 
+  /**
+   * Logarithmic fit {{1,10},{60, 100}}.
+   *
+   * @return a factor determining how many simulations can be done.
+   */
   private double simulationTimeFactor() {
-    return 21.0815D * Math
-        .log(1.57606D * TimeUnit.NANOSECONDS.toSeconds(TIMEOUT - (System.nanoTime() - START_TIME)));
+    return 21.9815D * Math.log(1.57606D * TimeUnit.NANOSECONDS.toSeconds(nanosLeft()));
   }
 
+  /**
+   * Exponential fit {{4,10},{40,2}}.
+   *
+   * @return a factor depending on the average branching factor determining how deep the minmax
+   * search can go.
+   */
   private double branchingFactor() {
-    return 11.5022D * Math.exp(-0.0349878D * averageBranching);
+    return 11.9581D * Math.exp(-0.0447066D * averageBranching);
   }
 
+  /**
+   * Logarithmic fit {{10, 0.5}, {40,1}}
+   *
+   * @return a factor depending on the nanos left determining how deep the minmax search can go.
+   */
   private double timeFactor() {
-    return 0.364096D * Math
-        .log(0.394822D
-            * TimeUnit.NANOSECONDS.toSeconds(
-            TIMEOUT - (System.nanoTime() - START_TIME)));
+    return 0.360674D * Math.log(0.4D * TimeUnit.NANOSECONDS.toSeconds(nanosLeft()));
   }
 
+  /**
+   * Logarithmic fit {{2, 1}, {12, 3}}
+   *
+   * @return a factor depending on how fast the previous calculation went.
+   */
   private double excessTimeBonus() {
-    return 1.67433D * Math.log(0.90856D * excessTime);
+    return 1.11622D * Math.log(1.22474D * excessTime);
   }
 
   private int determineDepth() {
