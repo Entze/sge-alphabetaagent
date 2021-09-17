@@ -8,10 +8,6 @@ version '1.0.1'
 
 sourceCompatibility = 1.11
 
-dependencies {
-    compile group: 'at.ac.tuwien.ifs.sge', name: 'sge', version: '1.0.1'
-}
-
 repositories {
     mavenCentral()
     maven {
